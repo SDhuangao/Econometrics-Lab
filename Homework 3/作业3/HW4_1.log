@@ -1,0 +1,408 @@
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\上机5&6\HW4_1.log
+  log type:  text
+ opened on:  19 Dec 2018, 21:23:59
+
+. *HW4_1
+. clear all
+
+. cd "D:\大三上\中级计量经济学\老师发的\Lab\上机5&6"
+D:\大三上\中级计量经济学\老师发的\Lab\上机5&6
+
+. import excel us_macro_monthly, sheet(us_macro_monthly.xls) cellrange(A1:D709) firstrow
+
+. 
+. generate time=m(1955m1)+_n-1
+
+. format time %tm
+
+. sort time
+
+. tsset time
+        time variable:  time, 1955m1 to 2013m12
+                delta:  1 month
+
+. 
+. *a
+. gen LINDPRO=log(INDPRO)
+
+. gen ip_growth=100*(LINDPRO[_n]-LINDPRO[_n-1])
+(1 missing value generated)
+
+. sum ip_growth
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+   ip_growth |        707    .2350164    .8828442  -4.302931   5.997896
+
+. //the mean is .2350164, the se is .8828442
+. //the units for ip_growth is percent points per month
+. 
+. *b
+. plot _T time
+
+ 25.9825 +  
+         |                                      *
+         |  
+         |  
+         |  
+         |  
+         |                   *
+         |                           *          *
+         |  
+    0    |                                                      *
+    _    |                                      *          *        *
+    T    |                   *                        *             *
+         |                                                      *
+         |                   *       *                              *
+         |                    *    **                            **
+         |                                             *   *    *
+         |               *  *      *                             * *
+         |                   *      **         *                  * *
+         |             *    *   *  ***                     *    *  *
+         |             *    * *  * ***                 *    *  * ** *
+       0 + *****************************************************************
+          +----------------------------------------------------------------+
+              -24                      time                           647
+
+
+. //the oil price fluctuates over time, many differences are negative, so O is 0.
+. //the minimal of O is 0. It can't be negative.
+. 
+. *c
+. global g_T "L(0/18)._T"
+
+. newey ip_g $g_T, lag(19)
+
+Regression with Newey-West standard errors      Number of obs     =        654
+maximum lag: 19                                 F( 19,       634) =       5.35
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey-West
+   ip_growth |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+          _T |
+         --. |   .0067549   .0090246     0.75   0.454    -.0109668    .0244766
+         L1. |  -.0201564   .0081355    -2.48   0.013    -.0361323   -.0041806
+         L2. |  -.0102137   .0089235    -1.14   0.253    -.0277369    .0073096
+         L3. |  -.0061018   .0098678    -0.62   0.537    -.0254793    .0132757
+         L4. |  -.0073849   .0099391    -0.74   0.458    -.0269024    .0121326
+         L5. |  -.0103567    .007376    -1.40   0.161     -.024841    .0041276
+         L6. |   -.031166   .0188816    -1.65   0.099     -.068244    .0059119
+         L7. |   -.000924   .0117291    -0.08   0.937    -.0239567    .0221086
+         L8. |   .0058648   .0123648     0.47   0.635    -.0184162    .0301458
+         L9. |  -.0187056   .0120093    -1.56   0.120    -.0422884    .0048773
+        L10. |  -.0433419   .0252386    -1.72   0.086    -.0929033    .0062195
+        L11. |  -.0351432   .0230668    -1.52   0.128    -.0804397    .0101533
+        L12. |   -.000582   .0153431    -0.04   0.970    -.0307115    .0295475
+        L13. |  -.0150696   .0128451    -1.17   0.241    -.0402937    .0101545
+        L14. |  -.0119531   .0095985    -1.25   0.213    -.0308017    .0068955
+        L15. |  -.0165024   .0094454    -1.75   0.081    -.0350504    .0020456
+        L16. |   -.003616   .0092092    -0.39   0.695    -.0217003    .0144683
+        L17. |   .0098928   .0089125     1.11   0.267    -.0076088    .0273944
+        L18. |    .008708   .0098318     0.89   0.376    -.0105988    .0280149
+             |
+       _cons |   .3683931   .0500309     7.36   0.000     .2701468    .4666394
+------------------------------------------------------------------------------
+
+. //m = 0.75T^(1/3)=7
+. dis "m =" 0.75*654^(1/3)
+m =6.5100928
+
+. 
+. *d
+. test _T L._T L2._T L3._T L4._T L5._T L6._T L7._T L8._T L9._T L10._T L11._T L12._T L13._T L14._T L15._T L16._T L17._T
+>  L18._T
+
+ ( 1)  _T = 0
+ ( 2)  L._T = 0
+ ( 3)  L2._T = 0
+ ( 4)  L3._T = 0
+ ( 5)  L4._T = 0
+ ( 6)  L5._T = 0
+ ( 7)  L6._T = 0
+ ( 8)  L7._T = 0
+ ( 9)  L8._T = 0
+ (10)  L9._T = 0
+ (11)  L10._T = 0
+ (12)  L11._T = 0
+ (13)  L12._T = 0
+ (14)  L13._T = 0
+ (15)  L14._T = 0
+ (16)  L15._T = 0
+ (17)  L16._T = 0
+ (18)  L17._T = 0
+ (19)  L18._T = 0
+
+       F( 19,   634) =    5.35
+            Prob > F =    0.0000
+
+. //the coefficients on Ot are statistically significantly different from zero.
+. 
+. *e
+. save mydata, replace
+file mydata.dta saved
+
+. statsby _b[_T] _b[L._T] _b[L2._T] _b[L3._T] _b[L4._T] _b[L5._T] _b[L6._T] _b[L7._T] _b[L8._T] _b[L9._T] _b[L10._T] _
+> b[L11._T] _b[L12._T] _b[L13._T] _b[L14._T] _b[L15._T] _b[L16._T] _b[L17._T] _b[L18._T]: newey ip_g $g_T, lag(19)
+(running newey on estimation sample)
+
+      command:  newey ip_g L(0/18)._T, lag(19)
+      _stat_1:  _b[_T]
+      _stat_2:  _b[L._T]
+      _stat_3:  _b[L2._T]
+      _stat_4:  _b[L3._T]
+      _stat_5:  _b[L4._T]
+      _stat_6:  _b[L5._T]
+      _stat_7:  _b[L6._T]
+      _stat_8:  _b[L7._T]
+      _stat_9:  _b[L8._T]
+     _stat_10:  _b[L9._T]
+     _stat_11:  _b[L10._T]
+     _stat_12:  _b[L11._T]
+     _stat_13:  _b[L12._T]
+     _stat_14:  _b[L13._T]
+     _stat_15:  _b[L14._T]
+     _stat_16:  _b[L15._T]
+     _stat_17:  _b[L16._T]
+     _stat_18:  _b[L17._T]
+     _stat_19:  _b[L18._T]
+           by:  <none>
+
+Statsby groups
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+.
+
+. xpose, clear
+
+. gen n=_n
+
+. rename v1 b
+
+. save tempt1, replace
+file tempt1.dta saved
+
+. use mydata,clear
+
+. statsby _se[_T] _se[L._T] _se[L2._T] _se[L3._T] _se[L4._T] _se[L5._T] _se[L6._T] _se[L7._T] _se[L8._T] _se[L9._T] _s
+> e[L10._T] _se[L11._T] _se[L12._T] _se[L13._T] _se[L14._T] _se[L15._T] _se[L16._T] _se[L17._T] _se[L18._T]: newey ip_
+> g $g_T, lag(19)
+(running newey on estimation sample)
+
+      command:  newey ip_g L(0/18)._T, lag(19)
+      _stat_1:  _se[_T]
+      _stat_2:  _se[L._T]
+      _stat_3:  _se[L2._T]
+      _stat_4:  _se[L3._T]
+      _stat_5:  _se[L4._T]
+      _stat_6:  _se[L5._T]
+      _stat_7:  _se[L6._T]
+      _stat_8:  _se[L7._T]
+      _stat_9:  _se[L8._T]
+     _stat_10:  _se[L9._T]
+     _stat_11:  _se[L10._T]
+     _stat_12:  _se[L11._T]
+     _stat_13:  _se[L12._T]
+     _stat_14:  _se[L13._T]
+     _stat_15:  _se[L14._T]
+     _stat_16:  _se[L15._T]
+     _stat_17:  _se[L16._T]
+     _stat_18:  _se[L17._T]
+     _stat_19:  _se[L18._T]
+           by:  <none>
+
+Statsby groups
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+.
+
+. xpose, clear
+
+. gen n=_n
+
+. rename v1 se
+
+. merge 1:1 n using tempt1
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                                19  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. save data1, replace
+file data1.dta saved
+
+. gen b_up=b+1.96*se
+
+. gen b_down=b-1.96*se
+
+. line b b_up b_down n ,title(dynamic multipliers) saving(dynamicmultipliers, replace)
+(file dynamicmultipliers.gph saved)
+
+. 
+. clear all
+
+. use mydata
+
+. gen d_T=_T[_n]-_T[_n-1]
+(37 missing values generated)
+
+. global gd_T1 "L(0/17).d_T"
+
+. newey ip_g L18._T $gd_T1, lag(19)
+
+Regression with Newey-West standard errors      Number of obs     =        654
+maximum lag: 19                                 F( 19,       634) =       5.35
+                                                Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+             |             Newey-West
+   ip_growth |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+          _T |
+        L18. |  -.1999968    .049668    -4.03   0.000    -.2975305   -.1024631
+             |
+         d_T |
+         --. |   .0067549   .0090246     0.75   0.454    -.0109668    .0244766
+         L1. |  -.0134015   .0111503    -1.20   0.230    -.0352974    .0084944
+         L2. |  -.0236152   .0153612    -1.54   0.125    -.0537802    .0065499
+         L3. |  -.0297169   .0207676    -1.43   0.153    -.0704985    .0110646
+         L4. |  -.0371019   .0242469    -1.53   0.126    -.0847158    .0105121
+         L5. |  -.0474586   .0277376    -1.71   0.088    -.1019272      .00701
+         L6. |  -.0786246   .0359668    -2.19   0.029    -.1492531   -.0079962
+         L7. |  -.0795487   .0299268    -2.66   0.008    -.1383163    -.020781
+         L8. |  -.0736839   .0270866    -2.72   0.007    -.1268742   -.0204937
+         L9. |  -.0923895    .030402    -3.04   0.002    -.1520903   -.0326887
+        L10. |  -.1357314    .042969    -3.16   0.002    -.2201102   -.0513526
+        L11. |  -.1708746   .0390244    -4.38   0.000    -.2475073   -.0942419
+        L12. |  -.1714566   .0472357    -3.63   0.000    -.2642139   -.0786994
+        L13. |  -.1865262   .0520499    -3.58   0.000    -.2887373   -.0843151
+        L14. |  -.1984793   .0542179    -3.66   0.000    -.3049477   -.0920109
+        L15. |  -.2149817   .0534974    -4.02   0.000    -.3200351   -.1099283
+        L16. |  -.2185977   .0502457    -4.35   0.000    -.3172657   -.1199296
+        L17. |  -.2087049   .0472185    -4.42   0.000    -.3014285   -.1159812
+             |
+       _cons |   .3683931   .0500309     7.36   0.000     .2701468    .4666394
+------------------------------------------------------------------------------
+
+. save mydata, replace
+file mydata.dta saved
+
+. statsby _b[d_T] _b[L.d_T] _b[L2.d_T] _b[L3.d_T] _b[L4.d_T] _b[L5.d_T] _b[L6.d_T] _b[L7.d_T] _b[L8.d_T] _b[L9.d_T] _b
+> [L10.d_T] _b[L11.d_T] _b[L12.d_T] _b[L13.d_T] _b[L14.d_T] _b[L15.d_T] _b[L16.d_T] _b[L17.d_T] _b[L18._T]: newey ip_g
+>  L18._T $gd_T1, lag(19)
+(running newey on estimation sample)
+
+      command:  newey ip_g L18._T L(0/17).d_T, lag(19)
+      _stat_1:  _b[d_T]
+      _stat_2:  _b[L.d_T]
+      _stat_3:  _b[L2.d_T]
+      _stat_4:  _b[L3.d_T]
+      _stat_5:  _b[L4.d_T]
+      _stat_6:  _b[L5.d_T]
+      _stat_7:  _b[L6.d_T]
+      _stat_8:  _b[L7.d_T]
+      _stat_9:  _b[L8.d_T]
+     _stat_10:  _b[L9.d_T]
+     _stat_11:  _b[L10.d_T]
+     _stat_12:  _b[L11.d_T]
+     _stat_13:  _b[L12.d_T]
+     _stat_14:  _b[L13.d_T]
+     _stat_15:  _b[L14.d_T]
+     _stat_16:  _b[L15.d_T]
+     _stat_17:  _b[L16.d_T]
+     _stat_18:  _b[L17.d_T]
+     _stat_19:  _b[L18._T]
+           by:  <none>
+
+Statsby groups
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+.
+
+. xpose, clear
+
+. gen n=_n
+
+. rename v1 b
+
+. save tempt1, replace
+file tempt1.dta saved
+
+. use mydata,clear
+
+. statsby _se[d_T] _se[L.d_T] _se[L2.d_T] _se[L3.d_T] _se[L4.d_T] _se[L5.d_T] _se[L6.d_T] _se[L7.d_T] _se[L8.d_T] _se[
+> L9.d_T] _se[L10.d_T] _se[L11.d_T] _se[L12.d_T] _se[L13.d_T] _se[L14.d_T] _se[L15.d_T] _se[L16.d_T] _se[L17.d_T] _se[
+> L18._T]: newey ip_g L18._T $gd_T1, lag(19)
+(running newey on estimation sample)
+
+      command:  newey ip_g L18._T L(0/17).d_T, lag(19)
+      _stat_1:  _se[d_T]
+      _stat_2:  _se[L.d_T]
+      _stat_3:  _se[L2.d_T]
+      _stat_4:  _se[L3.d_T]
+      _stat_5:  _se[L4.d_T]
+      _stat_6:  _se[L5.d_T]
+      _stat_7:  _se[L6.d_T]
+      _stat_8:  _se[L7.d_T]
+      _stat_9:  _se[L8.d_T]
+     _stat_10:  _se[L9.d_T]
+     _stat_11:  _se[L10.d_T]
+     _stat_12:  _se[L11.d_T]
+     _stat_13:  _se[L12.d_T]
+     _stat_14:  _se[L13.d_T]
+     _stat_15:  _se[L14.d_T]
+     _stat_16:  _se[L15.d_T]
+     _stat_17:  _se[L16.d_T]
+     _stat_18:  _se[L17.d_T]
+     _stat_19:  _se[L18._T]
+           by:  <none>
+
+Statsby groups
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+.
+
+. xpose, clear
+
+. gen n=_n
+
+. rename v1 se
+
+. merge 1:1 n using tempt1
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                                19  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. save data2, replace
+file data2.dta saved
+
+. gen b_up=b+1.96*se
+
+. gen b_down=b-1.96*se
+
+. line b b_up b_down n ,title(Cumulative multipliers) saving(Cumulativemultipliers, replace)
+(file Cumulativemultipliers.gph saved)
+
+. 
+. //the Cumulative multipliers show that oil price has negative impact on Industrial Production.
+. 
+. *f
+. // No, it's not exogenous.  Simultaneous causality is the reason.
+. // the estimated multipliers shown in the graphs in (e) is not reliable, because the OLS is biased.
+. 
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\上机5&6\HW4_1.log
+  log type:  text
+ closed on:  19 Dec 2018, 21:24:11
+----------------------------------------------------------------------------------------------------------------------

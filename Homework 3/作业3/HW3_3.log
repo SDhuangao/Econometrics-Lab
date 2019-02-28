@@ -1,0 +1,211 @@
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\上机5&6\HW3_3.log
+  log type:  text
+ opened on:  20 Dec 2018, 22:07:42
+
+. *HW3_3
+. clear all
+
+. cd "D:\大三上\中级计量经济学\老师发的\Lab\上机5&6"
+D:\大三上\中级计量经济学\老师发的\Lab\上机5&6
+
+. 
+. program myp
+  1. clear
+  2. drop _all
+  3. set obs 100
+  4. gen n=_n
+  5. 
+. gen e = rnormal()
+  6. gen y=e[1]
+  7. replace y=y[_n-1]+e[_n] if n>1
+  8. 
+. gen a = rnormal()
+  9. gen x=a[1]
+ 10. replace x=x[_n-1]+a[_n] if n>1
+ 11. 
+. reg y x
+ 12. gen Rsquare=e(r2)
+ 13. gen T_value=_b[x]/_se[x]
+ 14. end
+
+. 
+. *a
+. myp
+number of observations (_N) was 0, now 100
+(99 real changes made)
+(99 real changes made)
+
+      Source |       SS           df       MS      Number of obs   =       100
+-------------+----------------------------------   F(1, 98)        =     15.52
+       Model |  351.355131         1  351.355131   Prob > F        =    0.0002
+    Residual |  2218.32171        98  22.6359359   R-squared       =    0.1367
+-------------+----------------------------------   Adj R-squared   =    0.1279
+       Total |  2569.67685        99  25.9563318   Root MSE        =    4.7577
+
+------------------------------------------------------------------------------
+           y |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+           x |  -.7852484   .1993119    -3.94   0.000    -1.180776   -.3897205
+       _cons |  -3.596099   .5962062    -6.03   0.000    -4.779251   -2.412948
+------------------------------------------------------------------------------
+
+. *Rsquared is 0.5068, t= -12.34<-1.96, reject the null at 5%
+. 
+. *b
+. simulate r2=Rsquare t=T_value, seed(12345) reps(1000) nodots: myp
+
+      command:  myp
+           r2:  Rsquare
+            t:  T_value
+
+
+. su r2 t, detail
+
+                           Rsquare
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     .0001756       5.42e-06
+ 5%     .0019926       5.79e-06
+10%     .0087517       5.86e-06       Obs               1,000
+25%     .0486345       6.74e-06       Sum of Wgt.       1,000
+
+50%     .1740297                      Mean            .239937
+                        Largest       Std. Dev.      .2184822
+75%     .3867174       .8203572
+90%      .591392       .8330873       Variance       .0477345
+95%     .6863762       .8466657       Skewness       .8513937
+99%     .7861046       .8715798       Kurtosis       2.734755
+
+                           T_value
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -16.91202      -23.26212
+ 5%    -11.18675      -22.11636
+10%     -8.53348      -20.72758       Obs               1,000
+25%    -4.389529       -19.0235       Sum of Wgt.       1,000
+
+50%     .3334793                      Mean            .235574
+                        Largest       Std. Dev.      7.113285
+75%     4.648537       19.47802
+90%     8.991479       19.53876       Variance       50.59882
+95%     12.41548       21.15483       Skewness       .0782996
+99%     18.66866       25.78992       Kurtosis       3.305787
+
+. histogram r2, saving(Rsquare, replace)
+(bin=29, start=5.415e-06, width=.03005429)
+(file Rsquare.gph saved)
+
+. histogram t, saving(T_value, replace)
+(bin=29, start=-23.262119, width=1.6914497)
+(file T_value.gph saved)
+
+. *Rsquare 5% :.0019926  50% :.1740297  95%:.6863762
+. *T_value 5% :-11.18675 50% :.3334793  95%:12.41548
+. count if t>1.96|t<-1.96
+  779
+
+. local count= r(N)
+
+. local total = _N
+
+. gen fra=r(N)/1000
+
+. dis "fraction=" fra
+fraction=.77899998
+
+. 
+. *c
+. //T=50
+. program myp1
+  1. clear
+  2. drop _all
+  3. set obs 50
+  4. gen n=_n
+  5. 
+. gen e = rnormal()
+  6. gen y=e[1]
+  7. replace y=y[_n-1]+e[_n] if n>1
+  8. 
+. gen a = rnormal()
+  9. gen x=a[1]
+ 10. replace x=x[_n-1]+a[_n] if n>1
+ 11. 
+. reg y x
+ 12. gen Rsquare=e(r2)
+ 13. gen T_value=_b[x]/_se[x]
+ 14. end
+
+. simulate r21=Rsquare t1=T_value, seed(12345) reps(1000) nodots: myp1
+
+      command:  myp1
+          r21:  Rsquare
+           t1:  T_value
+
+
+. count if t1>1.96|t1<-1.96
+  669
+
+. local count= r(N)
+
+. gen fra1=r(N)/1000
+
+. dis "fraction=" fra1
+fraction=.66900003
+
+. 
+. 
+. //T=200
+. program myp2
+  1. clear
+  2. drop _all
+  3. set obs 200
+  4. gen n=_n
+  5. 
+. gen e = rnormal()
+  6. gen y=e[1]
+  7. replace y=y[_n-1]+e[_n] if n>1
+  8. 
+. gen a = rnormal()
+  9. gen x=a[1]
+ 10. replace x=x[_n-1]+a[_n] if n>1
+ 11. 
+. reg y x
+ 12. gen Rsquare=e(r2)
+ 13. gen T_value=_b[x]/_se[x]
+ 14. end
+
+. simulate r22=Rsquare t2=T_value, seed(34566) reps(1000) nodots: myp2
+
+      command:  myp2
+          r22:  Rsquare
+           t2:  T_value
+
+
+. count if t2>1.96|t2<-1.96
+  829
+
+. local count= r(N)
+
+. gen fra2=r(N)/1000
+
+. dis "fraction=" fra2
+fraction=.829
+
+. 
+. //As the sample size increases,the fraction of times that we reject the null hypothesis gets bigger.
+. //the limit is 1???
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\上机5&6\HW3_3.log
+  log type:  text
+ closed on:  20 Dec 2018, 22:08:11
+----------------------------------------------------------------------------------------------------------------------

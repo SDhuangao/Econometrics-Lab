@@ -1,0 +1,516 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}H:\大三上\中级计量经济学\老师发的\Lab\作业1\labwork1.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}16 Oct 2018, 17:49:06
+{txt}
+{com}. 
+. *遗漏变量的蒙特卡洛实验
+. clear all
+{res}{txt}
+{com}. program No_Omi, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen x = rnormal(0,10)
+{txt}  4{com}. gen u = rnormal(0,2)
+{txt}  5{com}. gen y = -20+3*x+u
+{txt}  6{com}. qui reg y x
+{txt}  7{com}. return scalar bhat = _b[x]
+{txt}  8{com}. end
+{txt}
+{com}. 
+. simulate best1 = r(bhat), seed(12345) reps(10000) nodots: No_Omi
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}No_Omi{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best1:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best1), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.952296       2.925485
+{txt} 5%    {res} 2.966595       2.932568
+{txt}10%    {res} 2.973886       2.933013       {txt}Obs         {res}     10,000
+{txt}25%    {res}  2.98626       2.935472       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 2.999727                      {txt}Mean          {res} 2.999802
+                        {txt}Largest       Std. Dev.     {res} .0202049
+{txt}75%    {res} 3.013285        3.07664
+{txt}90%    {res} 3.025737        3.07945       {txt}Variance      {res} .0004082
+{txt}95%    {res} 3.032588       3.081594       {txt}Skewness      {res} .0345686
+{txt}99%    {res} 3.047508       3.083473       {txt}Kurtosis      {res} 3.067233
+{txt}
+{com}. 
+. 
+. clear
+{txt}
+{com}. matrix P = (100, 16 \ 16, 9)
+{txt}
+{com}. mat A = cholesky(P)
+{txt}
+{com}. mat list A
+{res}
+{txt}A[2,2]
+           c1         c2
+r1 {res}        10          0
+{txt}r2 {res}       1.6  2.5377155
+{reset}
+{com}. global A
+{txt}
+{com}. 
+. program Omi_Bia, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen x1 = rnormal(0,1)
+{txt}  4{com}. gen v1 = rnormal(0,1)
+{txt}  5{com}. gen x = A[1,1]*x1
+{txt}  6{com}. gen v = A[2,1]*x1+A[2,2]*v1
+{txt}  7{com}. gen u = rnormal(0,4)
+{txt}  8{com}. gen y = -20+3*x+u+v
+{txt}  9{com}. qui reg y x
+{txt} 10{com}. return scalar bhat = _b[x]
+{txt} 11{com}. end
+{txt}
+{com}. 
+. simulate best2 = r(bhat), seed(66666) reps(10000) nodots: Omi_Bia
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Omi_Bia{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best2:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best2), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}  3.04929       2.984406
+{txt} 5%    {res} 3.081277       2.989591
+{txt}10%    {res} 3.097591       2.994051       {txt}Obs         {res}     10,000
+{txt}25%    {res} 3.127267       2.996255       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 3.159972                      {txt}Mean          {res} 3.160045
+                        {txt}Largest       Std. Dev.     {res} .0482449
+{txt}75%    {res} 3.192861       3.327522
+{txt}90%    {res} 3.221867        3.33385       {txt}Variance      {res} .0023276
+{txt}95%    {res} 3.239062        3.33546       {txt}Skewness      {res} .0084694
+{txt}99%    {res} 3.272844       3.338137       {txt}Kurtosis      {res}  2.96928
+{txt}
+{com}. 
+. 
+. clear
+{txt}
+{com}. matrix P = (100, -16 \ -16, 9)
+{txt}
+{com}. mat A = cholesky(P)
+{txt}
+{com}. mat list A
+{res}
+{txt}A[2,2]
+           c1         c2
+r1 {res}        10          0
+{txt}r2 {res}      -1.6  2.5377155
+{reset}
+{com}. global A
+{txt}
+{com}. 
+. program Omi_Bia1, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen x1 = rnormal(0,1)
+{txt}  4{com}. gen v1 = rnormal(0,1)
+{txt}  5{com}. gen x = A[1,1]*x1
+{txt}  6{com}. gen v = A[2,1]*x1+A[2,2]*v1
+{txt}  7{com}. gen u = rnormal(0,4)
+{txt}  8{com}. gen y = -20+3*x+u+v
+{txt}  9{com}. qui reg y x
+{txt} 10{com}. return scalar bhat = _b[x]
+{txt} 11{com}. end
+{txt}
+{com}. 
+. simulate best3 = r(bhat), seed(98765) reps(10000) nodots: Omi_Bia1
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Omi_Bia1{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best3:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best3), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.726993       2.665122
+{txt} 5%    {res} 2.761442       2.666167
+{txt}10%    {res} 2.778703       2.670601       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.808788       2.671074       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 2.839205                      {txt}Mean          {res} 2.840031
+                        {txt}Largest       Std. Dev.     {res} .0482625
+{txt}75%    {res} 2.872313        3.00446
+{txt}90%    {res} 2.900936       3.010689       {txt}Variance      {res} .0023293
+{txt}95%    {res} 2.919665       3.018065       {txt}Skewness      {res} .0235322
+{txt}99%    {res} 2.955278       3.078179       {txt}Kurtosis      {res} 3.142886
+{txt}
+{com}. 
+. clear
+{txt}
+{com}. matrix P = (100, 0 \ 0, 9)
+{txt}
+{com}. mat A = cholesky(P)
+{txt}
+{com}. mat list A
+{res}
+{txt}symmetric A[2,2]
+    c1  c2
+r1 {res} 10
+{txt}r2 {res}  0   3
+{reset}
+{com}. global A
+{txt}
+{com}. 
+. program Omi_Bia2, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen x1 = rnormal(0,1)
+{txt}  4{com}. gen v1 = rnormal(0,1)
+{txt}  5{com}. gen x = A[1,1]*x1
+{txt}  6{com}. gen v = A[2,1]*x1+A[2,2]*v1
+{txt}  7{com}. gen u = rnormal(0,4)
+{txt}  8{com}. gen y = -20+3*x+u+v
+{txt}  9{com}. qui reg y x
+{txt} 10{com}. return scalar bhat = _b[x]
+{txt} 11{com}. end
+{txt}
+{com}. 
+. simulate best4 = r(bhat), seed(45678) reps(10000) nodots: Omi_Bia2
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Omi_Bia2{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best4:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best4), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}  2.88179       2.795189
+{txt} 5%    {res} 2.916288       2.801162
+{txt}10%    {res} 2.934952       2.817129       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.965636       2.828233       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 3.000195                      {txt}Mean          {res} 3.000203
+                        {txt}Largest       Std. Dev.     {res} .0508606
+{txt}75%    {res} 3.034775       3.164184
+{txt}90%    {res} 3.065308       3.166988       {txt}Variance      {res} .0025868
+{txt}95%    {res} 3.084284       3.168919       {txt}Skewness      {res}-.0094503
+{txt}99%    {res} 3.117616       3.207233       {txt}Kurtosis      {res}  2.97354
+{txt}
+{com}. 
+. *Sample Selection 的蒙特卡洛实验
+. 
+. clear
+{txt}
+{com}. program Sam_Sel, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 200
+{txt}  3{com}. gen x = rnormal(0,100)
+{txt}  4{com}. gen u = rnormal(0,4)
+{txt}  5{com}. gen y = -20+3*x+u
+{txt}  6{com}. qui reg y x
+{txt}  7{com}. return scalar bhat = _b[x]
+{txt}  8{com}. end
+{txt}
+{com}. simulate best5 = r(bhat), seed(12345) reps(10000) nodots: Sam_Sel
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Sam_Sel{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best5:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best5), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.993335       2.988425
+{txt} 5%    {res} 2.995331       2.989703
+{txt}10%    {res} 2.996409       2.989815       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.998081       2.990018       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 2.999893                      {txt}Mean          {res} 2.999946
+                        {txt}Largest       Std. Dev.     {res}  .002817
+{txt}75%    {res} 3.001825       3.010025
+{txt}90%    {res} 3.003589       3.010057       {txt}Variance      {res} 7.94e-06
+{txt}95%    {res} 3.004567       3.010626       {txt}Skewness      {res} .0322127
+{txt}99%    {res} 3.006625       3.013548       {txt}Kurtosis      {res} 3.110047
+{txt}
+{com}. 
+. 
+. 
+. clear all
+{res}{txt}
+{com}. program Sam_Sel1, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 200
+{txt}  3{com}. gen x = rnormal(0,100)
+{txt}  4{com}. gen u = rnormal(0,4)
+{txt}  5{com}. sample 50
+{txt}  6{com}. gen y = -20+3*x+u
+{txt}  7{com}. qui reg y x
+{txt}  8{com}. return scalar bhat = _b[x]
+{txt}  9{com}. end
+{txt}
+{com}. simulate best6 = r(bhat), seed(123321) reps(10000) nodots: Sam_Sel1
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Sam_Sel1{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best6:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best6), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.990596       2.984171
+{txt} 5%    {res} 2.993366       2.985684
+{txt}10%    {res} 2.994779       2.985764       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.997234       2.985834       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 2.999964                      {txt}Mean          {res} 2.999983
+                        {txt}Largest       Std. Dev.     {res} .0040849
+{txt}75%    {res} 3.002743       3.014568
+{txt}90%    {res} 3.005232       3.015368       {txt}Variance      {res} .0000167
+{txt}95%    {res} 3.006621       3.016242       {txt}Skewness      {res} .0465279
+{txt}99%    {res} 3.009538       3.017129       {txt}Kurtosis      {res} 3.087572
+{txt}
+{com}. 
+. 
+. clear all
+{res}{txt}
+{com}. program Sam_Sel2, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 200
+{txt}  3{com}. gen x = rnormal(0,100)
+{txt}  4{com}. gen u = rnormal(0,4)
+{txt}  5{com}. gen y = -20+3*x+u
+{txt}  6{com}. keep if u >0
+{txt}  7{com}. qui reg y x
+{txt}  8{com}. return scalar bhat = _b[x]
+{txt}  9{com}. end
+{txt}
+{com}. simulate best7 = r(bhat), seed(34554) reps(10000) nodots: Sam_Sel2
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Sam_Sel2{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best7:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best7), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.994119       2.988863
+{txt} 5%    {res} 2.995932       2.990231
+{txt}10%    {res} 2.996866        2.99089       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.998398       2.990938       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 3.000036                      {txt}Mean          {res} 3.000024
+                        {txt}Largest       Std. Dev.     {res} .0024613
+{txt}75%    {res} 3.001636       3.008862
+{txt}90%    {res} 3.003159       3.009362       {txt}Variance      {res} 6.06e-06
+{txt}95%    {res} 3.004096       3.009447       {txt}Skewness      {res}-.0348886
+{txt}99%    {res} 3.005717       3.010479       {txt}Kurtosis      {res} 3.174386
+{txt}
+{com}. 
+. 
+. clear all
+{res}{txt}
+{com}. program Sam_Sel3, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 200
+{txt}  3{com}. gen x = rnormal(0,100)
+{txt}  4{com}. gen u = rnormal(0,4)
+{txt}  5{com}. gen y = -20+3*x+u
+{txt}  6{com}. keep if u < -0.5
+{txt}  7{com}. qui reg y x
+{txt}  8{com}. return scalar bhat = _b[x]
+{txt}  9{com}. end
+{txt}
+{com}. simulate best8 = r(bhat), seed(22222) reps(10000) nodots: Sam_Sel3
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Sam_Sel3{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best8:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best8), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.994253       2.989807
+{txt} 5%    {res} 2.995934       2.990174
+{txt}10%    {res} 2.996827       2.990929       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.998291       2.991278       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 2.999941                      {txt}Mean          {res} 2.999966
+                        {txt}Largest       Std. Dev.     {res} .0024879
+{txt}75%    {res} 3.001619       3.009744
+{txt}90%    {res} 3.003147       3.009749       {txt}Variance      {res} 6.19e-06
+{txt}95%    {res} 3.004097       3.009832       {txt}Skewness      {res} .0432028
+{txt}99%    {res} 3.005815       3.011741       {txt}Kurtosis      {res} 3.121554
+{txt}
+{com}. 
+. *测量误差的蒙特卡洛实验
+. clear all
+{res}{txt}
+{com}. program Mea_Err, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen x = rnormal(0,100)
+{txt}  4{com}. gen u = rnormal(0,4)
+{txt}  5{com}. gen v = rnormal(0,1)
+{txt}  6{com}. gen y = -20+3*x+u
+{txt}  7{com}. gen x1 = x +v
+{txt}  8{com}. qui reg y x1
+{txt}  9{com}. return scalar bhat = _b[x1]
+{txt} 10{com}. end
+{txt}
+{com}. simulate best9 = r(bhat), seed(11111) reps(10000) nodots: Mea_Err
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Mea_Err{p_end}
+{p2colset 9 17 21 2}{...}
+{p2col :best9:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best9), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.987901       2.980854
+{txt} 5%    {res} 2.991541       2.981515
+{txt}10%    {res} 2.993309       2.981764       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.996329       2.981799       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 2.999693                      {txt}Mean          {res} 2.999716
+                        {txt}Largest       Std. Dev.     {res} .0050377
+{txt}75%    {res} 3.003073       3.017319
+{txt}90%    {res} 3.006187       3.017569       {txt}Variance      {res} .0000254
+{txt}95%    {res} 3.008072        3.01813       {txt}Skewness      {res} .0279627
+{txt}99%    {res} 3.011485        3.01856       {txt}Kurtosis      {res} 3.051604
+{txt}
+{com}. 
+. 
+. clear all
+{res}{txt}
+{com}. program Mea_Err, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen x = rnormal(0,100)
+{txt}  4{com}. gen u = rnormal(0,4)
+{txt}  5{com}. gen v = rnormal(0,1)
+{txt}  6{com}. gen y = -20+3*x+u
+{txt}  7{com}. gen y1 = y +v
+{txt}  8{com}. qui reg y x
+{txt}  9{com}. return scalar bhat = _b[x]
+{txt} 10{com}. end
+{txt}
+{com}. simulate best10 = r(bhat), seed(33333) reps(10000) nodots: Mea_Err
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Mea_Err{p_end}
+{p2colset 8 17 21 2}{...}
+{p2col :best10:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best10), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res} 2.990566        2.98392
+{txt} 5%    {res} 2.993378       2.984688
+{txt}10%    {res} 2.994828       2.985695       {txt}Obs         {res}     10,000
+{txt}25%    {res} 2.997319       2.985807       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res} 3.000018                      {txt}Mean          {res} 3.000023
+                        {txt}Largest       Std. Dev.     {res}  .004074
+{txt}75%    {res} 3.002747       3.014343
+{txt}90%    {res} 3.005273        3.01442       {txt}Variance      {res} .0000166
+{txt}95%    {res} 3.006752       3.014782       {txt}Skewness      {res} .0267133
+{txt}99%    {res} 3.009856       3.014991       {txt}Kurtosis      {res} 3.079736
+{txt}
+{com}. 
+. *互为因果的蒙特卡洛实验
+. clear all
+{res}{txt}
+{com}. program Sim_Cau, rclass
+{txt}  1{com}. drop _all
+{txt}  2{com}. set obs 100
+{txt}  3{com}. gen t=_n
+{txt}  4{com}. gen u =rnormal(0,4)
+{txt}  5{com}. gen v =rnormal(0,9)
+{txt}  6{com}. gen x =rnormal(100,100) if t==1
+{txt}  7{com}. gen y =150-0.2*x+u if t==1
+{txt}  8{com}. 
+. forvalues i=2/100{c -(}
+{txt}  9{com}. replace x =-20+0.4*y[_n-1]+v if t>1
+{txt} 10{com}. replace y =150-0.2*x[_n]+u if t>1
+{txt} 11{com}. {c )-}
+{txt} 12{com}. 
+. qui reg y x
+{txt} 13{com}. return scalar bhat = _b[x]
+{txt} 14{com}. end
+{txt}
+{com}. simulate best11 = r(bhat), seed(23333) reps(10000) nodots: Sim_Cau
+{p2colset 7 17 21 2}{...}
+
+{txt}{p2col :command:}Sim_Cau{p_end}
+{p2colset 8 17 21 2}{...}
+{p2col :best11:}{res:r(bhat)}{p_end}
+
+
+{com}. summarize(best11), detail
+
+                           {txt}r(bhat)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}-.2844334      -.3555191
+{txt} 5%    {res}-.2561275      -.3499811
+{txt}10%    {res}-.2420777      -.3352575       {txt}Obs         {res}     10,000
+{txt}25%    {res}-.2210923      -.3343108       {txt}Sum of Wgt. {res}     10,000
+
+{txt}50%    {res}-.2002758                      {txt}Mean          {res}-.2003846
+                        {txt}Largest       Std. Dev.     {res} .0338107
+{txt}75%    {res}-.1794636      -.0782766
+{txt}90%    {res}-.1586053      -.0703401       {txt}Variance      {res} .0011432
+{txt}95%    {res}-.1445715      -.0668611       {txt}Skewness      {res}-.0167529
+{txt}99%    {res}-.1153826      -.0360102       {txt}Kurtosis      {res} 3.690315
+{txt}
+{com}. 
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}H:\大三上\中级计量经济学\老师发的\Lab\作业1\labwork1.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}16 Oct 2018, 18:01:03
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

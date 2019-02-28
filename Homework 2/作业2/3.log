@@ -1,0 +1,120 @@
+-------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\上机3&4\3.log
+  log type:  text
+ opened on:  13 Nov 2018, 20:48:25
+
+. clear all
+
+. cd "D:\大三上\中级计量经济学\老师发的\Lab\上机3&4"  /*for windows*/
+D:\大三上\中级计量经济学\老师发的\Lab\上机3&4
+
+. *cd "/Volumes/HAS/大三上/中级计量经济学/老师发的/Lab/上机3&4"
+. 
+. *HW2_3_Fertility
+. clear all
+
+. use fertility
+
+. *a
+. reg weeksm1 morekids, r
+
+Linear regression                               Number of obs     =    254,654
+                                                F(1, 254652)      =    3820.91
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0143
+                                                Root MSE          =      21.71
+
+------------------------------------------------------------------------------
+             |               Robust
+     weeksm1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    morekids |  -5.386996   .0871491   -61.81   0.000    -5.557806   -5.216186
+       _cons |   21.06843   .0560681   375.76   0.000     20.95854    21.17832
+------------------------------------------------------------------------------
+
+. /* Yes, 5.386996 weeks less  */
+. *b
+. /* There are omitted variables or function misspecification in the OLS model,
+> many things can affect the work people do, only using the kids variable is not
+> good. */
+. *c
+. reg morekids samesex, r
+
+Linear regression                               Number of obs     =    254,654
+                                                F(1, 254652)      =    1238.17
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0048
+                                                Root MSE          =     .48435
+
+------------------------------------------------------------------------------
+             |               Robust
+    morekids |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     samesex |   .0675253    .001919    35.19   0.000     .0637641    .0712865
+       _cons |   .3464248    .001341   258.34   0.000     .3437965    .3490531
+------------------------------------------------------------------------------
+
+. /* the coefficient is 0.0675253, the t=35.19, significant at 5%.
+> if the two children are of the same sex, the couple will have 6.75%
+> more chance to have another child.  */
+. *d
+. /* 1) relevence. samesex is correlated with morekids, as shown in c.
+>    2) exogeneity. samesex is probably uncorrelated with the error term
+> so, the variable samesex is a valid instrument for this regression. */
+. *e
+. /* F= 1238.17 >10, it's a strong instrument.  */
+. *f
+. ivreg weeksm1 (morekids = samesex), r
+
+Instrumental variables (2SLS) regression        Number of obs     =    254,654
+                                                F(1, 254652)      =      24.53
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0139
+                                                Root MSE          =     21.715
+
+------------------------------------------------------------------------------
+             |               Robust
+     weeksm1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    morekids |  -6.313685   1.274686    -4.95   0.000    -8.812035   -3.815335
+       _cons |   21.42109   .4872506    43.96   0.000     20.46609    22.37609
+------------------------------------------------------------------------------
+Instrumented:  morekids
+Instruments:   samesex
+------------------------------------------------------------------------------
+
+. /* the coefficient is -6.313685, having more than 2 kids will make the monther
+> work 6.313685 weeks less.  */
+. *g
+. ivreg weeksm1 (morekids = samesex) agem1 black hispan othrace, r
+
+Instrumental variables (2SLS) regression        Number of obs     =    254,654
+                                                F(5, 254648)      =    1390.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0437
+                                                Root MSE          =     21.385
+
+------------------------------------------------------------------------------
+             |               Robust
+     weeksm1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    morekids |  -5.821051   1.246401    -4.67   0.000    -8.263963   -3.378139
+       agem1 |   .8315975   .0226408    36.73   0.000     .7872221     .875973
+       black |   11.62327    .231798    50.14   0.000     11.16896    12.07759
+      hispan |   .4041802   .2607993     1.55   0.121    -.1069795    .9153399
+     othrace |   2.130962   .2109882    10.10   0.000     1.717431    2.544493
+       _cons |  -4.791894   .3897914   -12.29   0.000    -5.555874   -4.027913
+------------------------------------------------------------------------------
+Instrumented:  morekids
+Instruments:   agem1 black hispan othrace samesex
+------------------------------------------------------------------------------
+
+. /* 5.8 weeks less   */
+. 
+. log close
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\上机3&4\3.log
+  log type:  text
+ closed on:  13 Nov 2018, 20:48:27
+-------------------------------------------------------------------------------------

@@ -1,0 +1,184 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\作业1\labwork2.smcl
+  log type:  smcl
+ opened on:  15 Oct 2018, 22:29:18
+
+. 
+. clear all
+
+. cd "D:\大三上\中级计量经济学\老师发的\Lab\作业1"
+D:\大三上\中级计量经济学\老师发的\Lab\作业1
+
+. use fatality
+
+. keep state year beertax mrall
+
+. gen mrallp = mrall*10000
+
+. 
+. reg mrallp beertax if year == 1982, r
+
+Linear regression                               Number of obs     =         48
+                                                F(1, 46)          =       1.25
+                                                Prob > F          =     0.2687
+                                                R-squared         =     0.0133
+                                                Root MSE          =     .67048
+
+------------------------------------------------------------------------------
+             |               Robust
+      mrallp |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     beertax |   .1484603   .1326054     1.12   0.269    -.1184604    .4153811
+       _cons |   2.010381   .1495728    13.44   0.000     1.709307    2.311456
+------------------------------------------------------------------------------
+
+. predict t1
+(option xb assumed; fitted values)
+
+. twoway scatter mrallp t1 beertax if year == 1982, s(o i) c(. 1) name(first)
+(note:  named style 1 not found in class connectstyle, default attributes
+    used)
+
+. 
+. reg mrallp beertax if year == 1988, r
+
+Linear regression                               Number of obs     =         48
+                                                F(1, 46)          =      11.77
+                                                Prob > F          =     0.0013
+                                                R-squared         =     0.1340
+                                                Root MSE          =     .49025
+
+------------------------------------------------------------------------------
+             |               Robust
+      mrallp |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     beertax |   .4387546   .1278649     3.43   0.001     .1813758    .6961334
+       _cons |   1.859073   .1146124    16.22   0.000      1.62837    2.089776
+------------------------------------------------------------------------------
+
+. predict t2
+(option xb assumed; fitted values)
+
+. twoway scatter mrallp t2 beertax if year == 1988, s(o i) c(. 1) name(second)
+(note:  named style 1 not found in class connectstyle, default attributes
+    used)
+
+. 
+. gen fatr1 = mrallp-mrallp[_n-6]
+(6 missing values generated)
+
+. gen bet = beertax-beertax[_n-6]
+(6 missing values generated)
+
+. reg fatr1 bet if year == 1988, r
+
+Linear regression                               Number of obs     =         48
+                                                F(1, 46)          =       8.60
+                                                Prob > F          =     0.0052
+                                                R-squared         =     0.1192
+                                                Root MSE          =     .39402
+
+------------------------------------------------------------------------------
+             |               Robust
+       fatr1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         bet |  -1.040973   .3550062    -2.93   0.005    -1.755563   -.3263822
+       _cons |  -.0720371   .0653552    -1.10   0.276    -.2035903    .0595161
+------------------------------------------------------------------------------
+
+. predict t3
+(option xb assumed; fitted values)
+(6 missing values generated)
+
+. twoway scatter fatr1 t3 bet if year == 1988, s(o i) c(. 1) name(third)
+(note:  named style 1 not found in class connectstyle, default attributes
+    used)
+
+. 
+. xtset state year
+       panel variable:  state (strongly balanced)
+        time variable:  year, 1982 to 1988
+                delta:  1 unit
+
+. xtreg mrallp beertax, fe vce(cluster state)
+
+Fixed-effects (within) regression               Number of obs     =        336
+Group variable: state                           Number of groups  =         48
+
+R-sq:                                           Obs per group:
+     within  = 0.0407                                         min =          7
+     between = 0.1101                                         avg =        7.0
+     overall = 0.0934                                         max =          7
+
+                                                F(1,47)           =       5.05
+corr(u_i, Xb)  = -0.6885                        Prob > F          =     0.0294
+
+                                 (Std. Err. adjusted for 48 clusters in state)
+------------------------------------------------------------------------------
+             |               Robust
+      mrallp |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     beertax |  -.6558736   .2918556    -2.25   0.029    -1.243011   -.0687358
+       _cons |   2.377075   .1497966    15.87   0.000     2.075723    2.678427
+-------------+----------------------------------------------------------------
+     sigma_u |   .7147146
+     sigma_e |  .18985942
+         rho |  .93408484   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+. 
+. gen y83=(year==1983)
+
+. gen y84=(year==1984)
+
+. gen y85=(year==1985)
+
+. gen y86=(year==1986)
+
+. gen y87=(year==1987)
+
+. gen y88=(year==1988)
+
+. global yeardum "y83 y84 y85 y86 y87 y88"
+
+. xtreg mrallp beertax $yeardum, fe vce(cluster state)
+
+Fixed-effects (within) regression               Number of obs     =        336
+Group variable: state                           Number of groups  =         48
+
+R-sq:                                           Obs per group:
+     within  = 0.0803                                         min =          7
+     between = 0.1101                                         avg =        7.0
+     overall = 0.0876                                         max =          7
+
+                                                F(7,47)           =       4.36
+corr(u_i, Xb)  = -0.6781                        Prob > F          =     0.0009
+
+                                 (Std. Err. adjusted for 48 clusters in state)
+------------------------------------------------------------------------------
+             |               Robust
+      mrallp |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     beertax |  -.6399799   .3570783    -1.79   0.080    -1.358329    .0783691
+         y83 |  -.0799029   .0350861    -2.28   0.027    -.1504869   -.0093188
+         y84 |  -.0724206   .0438809    -1.65   0.106    -.1606975    .0158564
+         y85 |  -.1239763   .0460559    -2.69   0.010    -.2166288   -.0313238
+         y86 |  -.0378645   .0570604    -0.66   0.510    -.1526552    .0769262
+         y87 |  -.0509021   .0636084    -0.80   0.428    -.1788656    .0770615
+         y88 |  -.0518038   .0644023    -0.80   0.425    -.1813645    .0777568
+       _cons |    2.42847   .2016885    12.04   0.000     2.022725    2.834215
+-------------+----------------------------------------------------------------
+     sigma_u |  .70945965
+     sigma_e |  .18788295
+         rho |  .93446372   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+. log close
+      name:  <unnamed>
+       log:  D:\大三上\中级计量经济学\老师发的\Lab\作业1\labwork2.smcl
+  log type:  smcl
+ closed on:  15 Oct 2018, 22:29:21
+-------------------------------------------------------------------------------
